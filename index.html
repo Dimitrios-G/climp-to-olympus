@@ -494,6 +494,20 @@
                 grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
             }
         }
+        footer {
+            margin-top: 20px;
+            padding: 15px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.8rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-top: 1px solid rgba(255, 215, 0, 0.2);
+            width: 100%;
+            position: relative; /* Changed from fixed or absolute to relative */
+            bottom: 0;
+            left: 0;
+            box-sizing: border-box; /* Ensure padding is included in width */
+        }
     </style>
 </head>
 <body>
@@ -559,7 +573,9 @@
             <button class="btn" onclick="resetGame()">Παίξε Ξανά</button>
         </div>
     </div>
-
+    <footer>
+        <p>Climp to Olympus V.01 - Dimitrios Gallis 2025 &copy; All rights reserved</p>
+    </footer>
     <script>
         // Game state
         let players = [];
