@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏛️ Climb  to Olympus  - Ανάβαση στον Όλυμπο</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #f5f5f5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-image:
+                radial-gradient(circle at 20% 50%, rgba(255, 215, 0, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(176, 196, 222, 0.1) 0%, transparent 50%);
+            background-attachment: fixed;
+            overflow-x: hidden;
+        }
+
+        .setup-screen {
+            max-width: 90vw;
+            background: rgba(30, 30, 60, 0.9);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            text-align: center;
+        }
+
+        .setup-screen.hidden {
+            display: none;
+        }
+
+        .player-setup {
+            margin: 30px 0;
+        }
+
+        .player-count {
+            margin-bottom: 30px;
+        }
+
+        .player-count button {
+            margin: 0 10px;
+            padding: 10px 20px;
+            background: rgba(255, 215, 0, 0.2);
+            border: 2px solid rgba(255, 215, 0, 0.5);
+            border-radius: 10px;
+            color: #ffd700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .player-count button.active {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #1a1a2e;
+        }
+
+        .player-inputs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .player-input {
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .player-input input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            border-radius: 8px;
+            color: #f5f5f5;
+            margin-top: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .player-input input:focus {
+            outline: none;
+            border-color: #ffd700;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+        }
+
+        .player-input input.required {
+            border-color: #ff6b6b;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .player-pawn {
+            font-size: 2rem;
+            margin: 10px 0;
+        }
+
+        .score-section {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .score-title {
+            font-size: 1.2rem;
+            color: #ffd700;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .score-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .score-item {
+            background: rgba(255, 215, 0, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .game-container {
+            max-width: 95vw;
+            max-height: 95vh;
+            background: rgba(30, 30, 60, 0.9);
+            border-radius: 20px;
+            padding: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            display: none;
+        }
+
+        .game-container.active {
+            display: block;
+        }
+
+        .title {
+            text-align: center;
+            font-size: clamp(1.2rem, 3vw, 2rem);
+            margin-bottom: 15px;
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .music-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .music-btn {
+            padding: 8px 15px;
+            background: rgba(255, 215, 0, 0.2);
+            border: 1px solid rgba(255, 215, 0, 0.5);
+            border-radius: 20px;
+            color: #ffd700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .music-btn:hover {
+            background: rgba(255, 215, 0, 0.3);
+        }
+
+        .music-btn.active {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #1a1a2e;
+        }
+
+        .players-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .player-info {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 10px;
+            border: 2px solid transparent;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .player-info.current-player {
+            border-color: #ffd700;
+            background: rgba(255, 215, 0, 0.1);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .player-info .player-pawn {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .player-info .player-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .player-info .player-position {
+            font-size: 0.9rem;
+            color: #ffd700;
+        }
+
+        .player-info .player-wins {
+            font-size: 0.8rem;
+            color: #4ecdc4;
+            margin-top: 3px;
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 2px;
+            max-width: 600px;
+            margin: 0 auto 15px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 8px;
+            border-radius: 15px;
+            border: 2px solid rgba(255, 215, 0, 0.2);
+        }
+
+        .cell {
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, #2c2c54 0%, #40407a 100%);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(0.6rem, 1.5vw, 0.9rem);
+            font-weight: bold;
+            position: relative;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            min-height: 30px;
+            flex-direction: column;
+        }
+
+        .cell-number {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            font-size: 0.7rem;
+            opacity: 0.7;
+        }
+
+        .cell-players {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cell-player {
+            font-size: 1rem;
+            line-height: 1;
+        }
+
+        .cell:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+        }
+
+        .cell.special {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #1a1a2e;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+        }
+
+        .cell.ladder {
+            background: linear-gradient(135deg, #00d2d3, #54a0ff);
+            box-shadow: 0 0 15px rgba(0, 210, 211, 0.5);
+        }
+
+        .cell.snake {
+            background: linear-gradient(135deg, #ff3838, #ff6b6b);
+            box-shadow: 0 0 15px rgba(255, 56, 56, 0.5);
+        }
+
+        .event-message {
+            min-height: 40px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 15px;
+            text-align: center;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .dice-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .dice {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1a1a2e;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .dice:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 215, 0, 0.4);
+        }
+
+        .dice.rolling {
+            animation: roll 1s ease-in-out;
+        }
+
+        @keyframes roll {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(90deg); }
+            50% { transform: rotate(180deg); }
+            75% { transform: rotate(270deg); }
+        }
+
+        .btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #1a1a2e;
+            border: none;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 215, 0, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .victory-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .victory-modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .victory-content {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            border: 3px solid #ffd700;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7);
+            animation: celebrateWin 1s ease-out;
+        }
+
+        @keyframes celebrateWin {
+            0% { transform: scale(0.8) rotate(-10deg); }
+            50% { transform: scale(1.1) rotate(5deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+
+        .victory-content h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: #ffd700;
+            animation: sparkle 2s infinite;
+        }
+
+        @keyframes sparkle {
+            0%, 100% { text-shadow: 0 0 10px #ffd700; }
+            50% { text-shadow: 0 0 20px #ffd700, 0 0 30px #ffed4e; }
+        }
+
+        .winner-pawn {
+            font-size: 3rem;
+            margin: 20px 0;
+            animation: bounce 1s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 10px;
+            }
+
+            .game-board {
+                max-width: 100%;
+                padding: 5px;
+            }
+
+            .cell {
+                font-size: 0.7rem;
+                min-height: 25px;
+            }
+
+            .dice {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+            }
+
+            .players-info {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="setup-screen" id="setupScreen">
+        <h1 class="title">🏛️ Odyssey Climb - Ανάβαση στον Όλυμπο</h1>
+
+        <div class="score-section" id="scoreSection">
+            <div class="score-title">🏆 Σκορ Νικών</div>
+            <div class="score-list" id="scoreList">
+                <div style="text-align: center; opacity: 0.7;">Δεν υπάρχουν ακόμα νίκες!</div>
+            </div>
+            <button class="btn" onclick="clearScores()" style="margin-top: 10px; font-size: 0.8rem;">Καθάρισμα Σκορ</button>
+        </div>
+
+        <div class="player-count">
+            <h3>Επιλέξτε αριθμό παικτών:</h3>
+            <button onclick="selectPlayerCount(1)">1 Παίκτης</button>
+            <button onclick="selectPlayerCount(2)">2 Παίκτες</button>
+            <button onclick="selectPlayerCount(3)">3 Παίκτες</button>
+            <button onclick="selectPlayerCount(4)">4 Παίκτες</button>
+        </div>
+
+        <div class="player-inputs" id="playerInputs">
+            </div>
+
+        <button class="btn" onclick="startGame()">Ξεκίνα το Παιχνίδι</button>
+    </div>
+
+    <div class="game-container" id="gameContainer">
+        <div class="game-header">
+            <h1 class="title">🏛️ Odyssey Climb</h1>
+            <div class="music-controls">
+                <button class="music-btn active" id="musicBtn" onclick="toggleMusic()">🎵 Μουσική</button>
+                <button class="music-btn" onclick="showSetup()">⚙️ Ρυθμίσεις</button>
+            </div>
+        </div>
+
+        <div class="players-info" id="playersInfo">
+            </div>
+
+        <div class="event-message" id="eventMessage">
+            Καλωσήρθες στον Όλυμπο! Ρίξε το ζάρι για να ξεκινήσεις την περιπέτεια! 🏛️
+        </div>
+
+        <div class="game-board" id="gameBoard"></div>
+
+        <div class="controls">
+            <div class="dice-container">
+                <div class="dice" id="dice" onclick="rollDice()">🎲</div>
+            </div>
+            <button class="btn" id="rollBtn" onclick="rollDice()">Ρίξε το Ζάρι</button>
+            <button class="btn" onclick="resetGame()">Νέο Παιχνίδι</button>
+        </div>
+    </div>
+
+    <div class="victory-modal" id="victoryModal">
+        <div class="victory-content">
+            <h2>🏆 Συγχαρητήρια!</h2>
+            <div class="winner-pawn" id="winnerPawn"></div>
+            <p id="winnerName">Παίκτης νίκησε!</p>
+            <p>Έφτασες στον Όλυμπο!</p>
+            <br>
+            <button class="btn" onclick="resetGame()">Παίξε Ξανά</button>
+        </div>
+    </div>
+
+    <script>
+        // Game state
+        let players = [];
+        let currentPlayerIndex = 0;
+        let isRolling = false;
+        let audioContext;
+        let backgroundMusic;
+        let musicEnabled = true;
+        let scores = JSON.parse(localStorage.getItem('odysseyClimbScores') || '{}');
+
+        // Player pawns
+        const playerPawns = ['🏛️', '⚡', '🏺', '🦅'];
+        const playerColors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24'];
+
+        // Special cells configuration
+        const specialCells = {
+            // Ladders (positive events)
+            4: { type: 'ladder', target: 14, message: '🏛️ Βρήκες μια αρχαία στήλη! Σκαρφάλωσε προς τα πάνω!' },
+            9: { type: 'ladder', target: 21, message: '🦅 Ο αετός του Διός σε μεταφέρει ψηλότερα!' },
+            16: { type: 'ladder', target: 33, message: '⚡ Η δύναμη του Ποσειδώνα σε ανυψώνει!' },
+            28: { type: 'ladder', target: 44, message: '🔥 Η φλόγα του Προμηθέα σε οδηγεί προς τον Όλυμπο!' },
+            36: { type: 'ladder', target: 57, message: '🏺 Βρήκες το κέρας της Αμαλθείας!' },
+            51: { type: 'ladder', target: 67, message: '🌟 Η Αθηνά σε ευλογεί με σοφία!' },
+            71: { type: 'ladder', target: 91, message: '🎭 Οι Μούσες σε εμπνέουν για τον τελικό άλμα!' },
+
+            // Snakes (negative events)
+            98: { type: 'snake', target: 78, message: '🐍 Η Πύθια σε προειδοποιεί! Επιστροφή!' },
+            95: { type: 'snake', target: 75, message: '🌪️ Ο Αίολος σε παρασύρει με τους ανέμους!' },
+            87: { type: 'snake', target: 24, message: '💀 Ο Άδης σε καλεί στον κάτω κόσμο!' },
+            64: { type: 'snake', target: 60, message: '🌊 Η Σκύλλα σε τραβάει προς τα κάτω!' },
+            54: { type: 'snake', target: 34, message: '⚡ Η οργή του Διός σε χτυπά!' },
+            42: { type: 'snake', target: 22, message: '🕷️ Η Αράχνη σε παγιδεύει στον ιστό της!' },
+            19: { type: 'snake', target: 7, message: '🐎 Το Τρωικό άλογο σε κάνει να οπισθοχωρήσεις!' },
+
+            // Special events (neutral)
+            13: { type: 'special', message: '🎭 Συνάντησες τον Διόνυσο! Χάνεις μια σειρά!' },
+            31: { type: 'special', message: '🏺 Η Πανδώρα άνοιξε το κουτί! Bonus!' },
+            49: { type: 'special', message: '🦋 Η Ψυχή σε καθοδηγεί! Ρίξε ξανά!' },
+            77: { type: 'special', message: '🌈 Η Ίριδα σε φωτίζει! Διπλό ζάρι!' },
+            83: { type: 'special', message: '🎵 Ο Απόλλων παίζει λύρα! Bonus!' }
+        };
+
+        // Enhanced Audio functions with new sounds
+        function createAudioContext() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function createBackgroundMusic() {
+            if (!audioContext || !musicEnabled) return;
+
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            // A new, more mysterious and slightly playful melody in minor/modal scale
+            const newMelody = [
+                391.99, // G4
+                440.00, // A4
+                493.88, // B4
+                523.25, // C5
+                440.00, // A4
+                587.33, // D5
+                493.88, // B4
+                391.99, // G4
+                329.63, // E4
+                391.99, // G4
+                440.00, // A4
+                329.63  // E4
+            ];
+            let noteIndex = 0;
+
+            oscillator.frequency.value = newMelody[0];
+            oscillator.type = 'triangle'; // Changed to triangle for a softer sound
+            gainNode.gain.value = 0.05; // Slightly louder
+
+            oscillator.start();
+
+            const changeNote = () => {
+                if (musicEnabled && backgroundMusic) {
+                    noteIndex = (noteIndex + 1) % newMelody.length;
+                    oscillator.frequency.setValueAtTime(newMelody[noteIndex], audioContext.currentTime);
+                    setTimeout(changeNote, 400); // Slightly slower than before for a more flowing feel
+                }
+            };
+
+            setTimeout(changeNote, 400);
+
+            return {
+                oscillator,
+                gainNode,
+                stop: () => {
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+                    oscillator.stop(audioContext.currentTime + 0.1);
+                }
+            };
+        }
+
+        function startBackgroundMusic() {
+            if (musicEnabled && !backgroundMusic) {
+                createAudioContext();
+                backgroundMusic = createBackgroundMusic();
+            }
+        }
+
+        function stopBackgroundMusic() {
+            if (backgroundMusic) {
+                backgroundMusic.stop();
+                backgroundMusic = null;
+            }
+        }
+
+        function toggleMusic() {
+            musicEnabled = !musicEnabled;
+            const btn = document.getElementById('musicBtn');
+
+            if (musicEnabled) {
+                btn.textContent = '🎵 Μουσική';
+                btn.classList.add('active');
+                startBackgroundMusic();
+            } else {
+                btn.textContent = '🔇 Μουσική';
+                btn.classList.remove('active');
+                stopBackgroundMusic();
+            }
+        }
+
+        function playChord(frequencies, duration) {
+            if (!musicEnabled) return;
+            createAudioContext();
+
+            frequencies.forEach(freq => {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                oscillator.frequency.value = freq;
+                oscillator.type = 'sine';
+
+                gainNode.gain.setValueAtTime(0.05, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + duration);
+            });
+        }
+
+        function playMelody(notes, noteDuration = 0.15) {
+            if (!musicEnabled) return;
+            notes.forEach((freq, index) => {
+                setTimeout(() => {
+                    playChord([freq], noteDuration);
+                }, index * noteDuration * 1000);
+            });
+        }
+
+        function playDiceRoll() {
+            // A more whimsical, short sequence
+            const diceNotes = [784, 880, 988, 1047]; // G5, A5, B5, C6
+            playMelody(diceNotes, 0.06); // Faster, distinct
+        }
+
+        function playMove() {
+            // A subtle "plink" sound
+            playChord([659], 0.05); // E5
+        }
+
+        function playLadder() {
+            // Arpeggio up
+            const ladderNotes = [392, 523, 659, 784, 988]; // G4, C5, E5, G5, B5
+            playMelody(ladderNotes, 0.08);
+        }
+
+        function playSnake() {
+            // Descending, slightly dissonant
+            const snakeNotes = [784, 740, 698, 622, 587]; // G5, F#5, F5, Eb5, D5
+            playMelody(snakeNotes, 0.09);
+        }
+
+        function playSpecial() {
+            // A short, curious sequence
+            const specialNotes = [494, 587, 494, 659]; // B4, D5, B4, E5
+            playMelody(specialNotes, 0.1);
+        }
+
+        function playVictory() {
+            // Grand, concluding chord with arpeggio
+            const victoryMelody = [784, 880, 988, 1047, 1175]; // G5, A5, B5, C6, D6
+            playMelody(victoryMelody, 0.15);
+            setTimeout(() => {
+                playChord([784, 988, 1175], 2); // G5, B5, D6 - major chord
+            }, victoryMelody.length * 0.15 * 1000);
+        }
+
+        // Score management
+        function updateScoreDisplay() {
+            const scoreList = document.getElementById('scoreList');
+
+            if (Object.keys(scores).length === 0) {
+                scoreList.innerHTML = '<div style="text-align: center; opacity: 0.7;">Δεν υπάρχουν ακόμα νίκες!</div>';
+                return;
+            }
+
+            // Sort players by wins (descending)
+            const sortedScores = Object.entries(scores)
+                .sort(([,a], [,b]) => b - a)
+                .slice(0, 10); // Show top 10
+
+            scoreList.innerHTML = sortedScores.map(([name, wins], index) => {
+                const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '🏅';
+                return `
+                    <div class="score-item">
+                        <span>${medal} ${name}</span>
+                        <span>${wins} νίκ${wins === 1 ? 'η' : 'ες'}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function saveScore(playerName) {
+            if (scores[playerName]) {
+                scores[playerName]++;
+            } else {
+                scores[playerName] = 1;
+            }
+            localStorage.setItem('odysseyClimbScores', JSON.stringify(scores));
+            updateScoreDisplay();
+        }
+
+        function clearScores() {
+            if (confirm('Θέλετε σίγουρα να διαγράψετε όλα τα σκορ;')) {
+                scores = {};
+                localStorage.removeItem('odysseyClimbScores');
+                updateScoreDisplay();
+            }
+        }
+
+        // Setup functions
+        function selectPlayerCount(count) {
+            // Update button states
+            document.querySelectorAll('.player-count button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Generate player inputs
+            const container = document.getElementById('playerInputs');
+            container.innerHTML = '';
+
+            for (let i = 0; i < count; i++) {
+                const playerDiv = document.createElement('div');
+                playerDiv.className = 'player-input';
+                playerDiv.innerHTML = `
+                    <div class="player-pawn">${playerPawns[i]}</div>
+                    <label>Παίκτης ${i + 1}:</label>
+                    <input type="text" id="player${i}" placeholder="Εισάγετε το όνομά σας" maxlength="15" required>
+                `;
+                container.appendChild(playerDiv);
+            }
+
+            // Focus on first input
+            setTimeout(() => {
+                const firstInput = document.getElementById('player0');
+                if (firstInput) firstInput.focus();
+            }, 100);
+        }
+
+        function validatePlayerNames() {
+            const inputs = document.querySelectorAll('.player-input input');
+            let allValid = true;
+
+            inputs.forEach(input => {
+                input.classList.remove('required');
+                if (!input.value.trim()) {
+                    input.classList.add('required');
+                    allValid = false;
+                }
+            });
+
+            if (!allValid) {
+                alert('Παρακαλώ εισάγετε όνομα για όλους τους παίκτες!');
+            }
+
+            return allValid;
+        }
+
+        function startGame() {
+            // Get player names
+            const inputs = document.querySelectorAll('.player-input input');
+            if (inputs.length === 0) {
+                alert('Παρακαλώ επιλέξτε αριθμό παικτών!');
+                return;
+            }
+
+            if (!validatePlayerNames()) {
+                return;
+            }
+
+            players = [];
+            inputs.forEach((input, index) => {
+                const playerName = input.value.trim();
+                players.push({
+                    name: playerName,
+                    position: 1,
+                    pawn: playerPawns[index],
+                    color: playerColors[index],
+                    wins: scores[playerName] || 0
+                });
+            });
+
+            currentPlayerIndex = 0;
+
+            // Hide setup, show game
+            document.getElementById('setupScreen').classList.add('hidden');
+            document.getElementById('gameContainer').classList.add('active');
+
+            initializeGame();
+            startBackgroundMusic();
+        }
+
+        function showSetup() {
+            document.getElementById('setupScreen').classList.remove('hidden');
+            document.getElementById('gameContainer').classList.remove('active');
+            stopBackgroundMusic();
+            updateScoreDisplay();
+        }
+
+        function initializeGame() {
+            createBoard();
+            createPlayersInfo();
+            updateCurrentPlayer();
+            updatePlayerPositions();
+
+            document.getElementById('eventMessage').textContent =
+                `${players[currentPlayerIndex].name}, είναι η σειρά σου! Ρίξε το ζάρι! 🎲`;
+        }
+
+        function createPlayersInfo() {
+            const container = document.getElementById('playersInfo');
+            container.innerHTML = '';
+
+            players.forEach((player, index) => {
+                const playerDiv = document.createElement('div');
+                playerDiv.className = 'player-info';
+                playerDiv.id = `player-info-${index}`;
+                playerDiv.innerHTML = `
+                    <div class="player-pawn">${player.pawn}</div>
+                    <div class="player-name">${player.name}</div>
+                    <div class="player-position">Θέση: ${player.position}</div>
+                    <div class="player-wins">🏆 ${player.wins} νίκ${player.wins === 1 ? 'η' : 'ες'}</div>
+                `;
+                container.appendChild(playerDiv);
+            });
+        }
+
+        function updateCurrentPlayer() {
+            document.querySelectorAll('.player-info').forEach(info => {
+                info.classList.remove('current-player');
+            });
+
+            document.getElementById(`player-info-${currentPlayerIndex}`).classList.add('current-player');
+        }
+
+        function createBoard() {
+            const board = document.getElementById('gameBoard');
+            board.innerHTML = '';
+
+            for (let i = 100; i >= 1; i--) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.id = `cell-${i}`;
+
+                // Determine row to implement snake-like numbering
+                const row = Math.floor((100 - i) / 10);
+                const col = (100 - i) % 10;
+                const actualNumber = row % 2 === 0 ?
+                    100 - (row * 10 + col) :
+                    100 - (row * 10 + (9 - col));
+
+                cell.innerHTML = `
+                    <div class="cell-number">${actualNumber}</div>
+                    <div class="cell-players" id="cell-players-${actualNumber}"></div>
+                `;
+
+                // Add special cell styling
+                if (specialCells[actualNumber]) {
+                    cell.classList.add(specialCells[actualNumber].type);
+                    const playersDiv = cell.querySelector('.cell-players');
+                    if (specialCells[actualNumber].type === 'ladder') {
+                        playersDiv.innerHTML = '🏛️';
+                    } else if (specialCells[actualNumber].type === 'snake') {
+                        playersDiv.innerHTML = '🐍';
+                    } else if (specialCells[actualNumber].type === 'special') {
+                        playersDiv.innerHTML = '⭐';
+                    }
+                }
+
+                board.appendChild(cell);
+            }
+        }
+
+        function updatePlayerPositions() {
+            // Clear all player positions
+            document.querySelectorAll('.cell-players').forEach(container => {
+                const cellNumber = container.id.split('-')[2];
+                if (specialCells[cellNumber]) {
+                    // Keep special symbols for special cells
+                    const special = specialCells[cellNumber];
+                    if (special.type === 'ladder') {
+                        container.innerHTML = '🏛️';
+                    } else if (special.type === 'snake') {
+                        container.innerHTML = '🐍';
+                    } else if (special.type === 'special') {
+                        container.innerHTML = '⭐';
+                    }
+                } else {
+                    container.innerHTML = '';
+                }
+            });
+
+            // Add players to their current positions
+            players.forEach(player => {
+                const cellPlayers = document.getElementById(`cell-players-${player.position}`);
+                if (cellPlayers) {
+                    const playerSpan = document.createElement('span');
+                    playerSpan.className = 'cell-player';
+                    playerSpan.textContent = player.pawn;
+                    cellPlayers.appendChild(playerSpan);
+                }
+            });
+
+            // Update player info
+            players.forEach((player, index) => {
+                const positionDiv = document.querySelector(`#player-info-${index} .player-position`);
+                if (positionDiv) {
+                    positionDiv.textContent = `Θέση: ${player.position}`;
+                }
+            });
+        }
+
+        function rollDice() {
+            if (isRolling) return;
+
+            isRolling = true;
+            const dice = document.getElementById('dice');
+            const rollBtn = document.getElementById('rollBtn');
+
+            dice.classList.add('rolling');
+            rollBtn.disabled = true;
+
+            playDiceRoll();
+
+            // Show random numbers while rolling
+            const rollAnimation = setInterval(() => {
+                dice.textContent = Math.floor(Math.random() * 6) + 1;
+            }, 100);
+
+            setTimeout(() => {
+                clearInterval(rollAnimation);
+                const diceValue = Math.floor(Math.random() * 6) + 1;
+                dice.textContent = diceValue;
+                dice.classList.remove('rolling');
+
+                movePlayer(diceValue);
+
+                setTimeout(() => {
+                    isRolling = false;
+                    rollBtn.disabled = false;
+                }, 1000);
+            }, 1000);
+        }
+
+        function movePlayer(steps) {
+            const currentPlayer = players[currentPlayerIndex];
+            const newPosition = Math.min(currentPlayer.position + steps, 100);
+
+            // Animate movement
+            let currentPos = currentPlayer.position;
+            const moveInterval = setInterval(() => {
+                if (currentPos < newPosition) {
+                    currentPos++;
+                    currentPlayer.position = currentPos;
+                    updatePlayerPositions();
+                    playMove();
+                } else {
+                    clearInterval(moveInterval);
+
+                    // Check for special cells
+                    if (specialCells[currentPlayer.position]) {
+                        handleSpecialCell(currentPlayer);
+                    } else {
+                        // Check for victory
+                        if (currentPlayer.position === 100) {
+                            showVictory(currentPlayer);
+                        } else {
+                            nextPlayer();
+                        }
+                    }
+                }
+            }, 300);
+        }
+
+        function handleSpecialCell(player) {
+            const special = specialCells[player.position];
+            const eventMessage = document.getElementById('eventMessage');
+
+            eventMessage.textContent = special.message;
+
+            setTimeout(() => {
+                if (special.type === 'ladder') {
+                    playLadder();
+                    player.position = special.target;
+                    updatePlayerPositions();
+                    eventMessage.textContent = `${player.name} σκαρφάλωσε στη θέση ${special.target}! 🏛️`;
+                } else if (special.type === 'snake') {
+                    playSnake();
+                    player.position = special.target;
+                    updatePlayerPositions();
+                    eventMessage.textContent = `${player.name} γλίστρησε στη θέση ${special.target}! 🐍`;
+                } else if (special.type === 'special') {
+                    playSpecial();
+                    // Handle special events
+                    if (player.position === 13) {
+                        // Skip next turn
+                        eventMessage.textContent = `${player.name} χάνει μια σειρά! 🎭`;
+                        nextPlayer();
+                        nextPlayer();
+                        return;
+                    } else if (player.position === 31 || player.position === 49 || player.position === 77 || player.position === 83) {
+                        // Roll again
+                        eventMessage.textContent = `${player.name} ρίχνει ξανά! ⭐`;
+                        setTimeout(() => {
+                            eventMessage.textContent = `${player.name}, ρίξε το ζάρι ξανά! 🎲`;
+                        }, 2000);
+                        return;
+                    }
+                }
+
+                setTimeout(() => {
+                    if (player.position === 100) {
+                        showVictory(player);
+                    } else {
+                        nextPlayer();
+                    }
+                }, 2000);
+            }, 2000);
+        }
+
+        function nextPlayer() {
+            currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+            updateCurrentPlayer();
+
+            const eventMessage = document.getElementById('eventMessage');
+            eventMessage.textContent = `${players[currentPlayerIndex].name}, είναι η σειρά σου! Ρίξε το ζάρι! 🎲`;
+        }
+
+        function showVictory(winner) {
+            playVictory();
+            stopBackgroundMusic();
+
+            // Save the win
+            saveScore(winner.name);
+
+            document.getElementById('winnerPawn').textContent = winner.pawn;
+            document.getElementById('winnerName').textContent = `${winner.name} νίκησε!`;
+            document.getElementById('victoryModal').classList.add('show');
+
+            // Update player wins count
+            winner.wins = scores[winner.name];
+            createPlayersInfo();
+        }
+
+        function resetGame() {
+            // Reset game state
+            players = [];
+            currentPlayerIndex = 0;
+            isRolling = false;
+
+            // Hide victory modal
+            document.getElementById('victoryModal').classList.remove('show');
+
+            // Show setup screen
+            document.getElementById('setupScreen').classList.remove('hidden');
+            document.getElementById('gameContainer').classList.remove('active');
+
+            // Reset dice
+            document.getElementById('dice').textContent = '🎲';
+
+            // Stop music
+            stopBackgroundMusic();
+
+            // Update score display
+            updateScoreDisplay();
+        }
+
+        // Initialize the game
+        document.addEventListener('DOMContentLoaded', function() {
+            // Auto-select 2 players by default
+            selectPlayerCount(2);
+            updateScoreDisplay();
+
+            // Add Enter key support for player name inputs
+            document.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    const activeElement = document.activeElement;
+                    if (activeElement && activeElement.classList.contains('player-input')) {
+                        // Move to next input or start game
+                        const inputs = Array.from(document.querySelectorAll('.player-input input'));
+                        const currentIndex = inputs.indexOf(activeElement);
+
+                        if (currentIndex < inputs.length - 1) {
+                            inputs[currentIndex + 1].focus();
+                        } else {
+                            startGame();
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
